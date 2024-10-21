@@ -1,4 +1,25 @@
+/* Set up using Vue 3 */
 import { createApp } from 'vue'
 import App from './App.vue'
+import PrimeVue from 'primevue/config';
+import Tooltip from 'primevue/tooltip';
+import Card from 'primevue/card';
 
-createApp(App).mount('#app')
+/* import the fontawesome core */
+import { library } from '@fortawesome/fontawesome-svg-core'
+
+/* import font awesome icon component */
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+/* import specific icons */
+import { faUserSecret } from '@fortawesome/free-solid-svg-icons'
+
+/* add icons to the library */
+library.add(faUserSecret)
+
+createApp(App)
+  .component('font-awesome-icon', FontAwesomeIcon)
+  .use(PrimeVue)
+  .use(Card)
+  .directive('tooltip', Tooltip)
+  .mount('#app')

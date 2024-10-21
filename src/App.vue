@@ -1,26 +1,48 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="app">
+    <SidebarMenu />
+    <MenuBarUp />
+    <Card style="width: 25rem; overflow: hidden">
+      <template #header>
+        <img alt="user header" src="/images/usercard.png" />
+      </template>
+      <template #title>Advanced Card</template>
+      <template #subtitle>Card subtitle</template>
+      <template #content>
+        <p class="m-0">
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Inventore sed consequuntur error repudiandae numquam
+          deserunt quisquam repellat libero asperiores earum nam nobis, culpa ratione quam perferendis esse, cupiditate
+          neque
+          quas!
+        </p>
+      </template>
+      <template #footer>
+        <div class="flex gap-4 mt-1">
+          <Button label="Cancel" severity="secondary" outlined class="w-full" />
+          <Button label="Save" class="w-full" />
+        </div>
+      </template>
+    </Card>
+  </div>
 </template>
 
-<script>
-import HelloWorld from './components/HelloWorld.vue'
+<script setup>
+import SidebarMenu from './components/SidebarMenu.vue';
+import MenuBarUp from './components/MenuBarUp.vue';
 
-export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
 </script>
 
 <style>
+.main-content {
+  margin-left: 250px;
+  padding: 20px;
+}
+
+body {
+  background-color: #131736;
+}
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  display: flex;
 }
 </style>
