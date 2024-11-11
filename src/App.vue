@@ -179,7 +179,11 @@ import InputNumber from 'primevue/inputnumber';
 import InputGroup from 'primevue/inputgroup';
 import Slider from 'primevue/slider';
 import ProgressSpinner from 'primevue/progressspinner';
+import { state } from "@/socket";
 
+const connected = ref(state.connected);
+const cycleCounter = ref(state.cycleCounter);
+const cycleResults = ref(state.cycleResults);
 const visible = ref(false);
 /* Datos iniciales*/
 const numagentes = ref(0);
