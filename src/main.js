@@ -5,6 +5,9 @@ import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura'
 import App from './App.vue'
 import Tooltip from 'primevue/tooltip';
+import router from './router';
+import 'primeicons/primeicons.css';
+import ConfirmationService from 'primevue/confirmationservice';
 /* import the fontawesome core */
 import { library } from '@fortawesome/fontawesome-svg-core'
 
@@ -27,5 +30,7 @@ app.use(PrimeVue, {
     }
 });
 app.directive('tooltip', Tooltip);
-app.component('font-awesome-icon', FontAwesomeIcon)
-app.mount("#app")
+app.component('font-awesome-icon', FontAwesomeIcon);
+app.use(router);
+app.use(ConfirmationService);
+app.mount("#app");
