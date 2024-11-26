@@ -4,7 +4,7 @@
       <h1 style="margin-right: 1%;">Simulacion de datos</h1>
       <div style="display: flex; align-items: center; justify-content: center;">
         <Button severity="success" style="margin-right: 3%;" icon="pi pi-pause"
-          v-tooltip.bottom="'Pausar/Reanudar Simulacion'" />
+          v-tooltip.bottom="'Pausar/Reanudar Simulacion'" @click="pauseAndActiveSimulation" />
         <Button severity="success" style="margin-right:3%;" icon="pi pi-filter"
           v-tooltip.bottom="'Cambiar Parametros Ambientales'" @click="toggle" />
         <Popover ref="op">
@@ -157,6 +157,7 @@ export default {
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import axios from 'axios';
 import Button from 'primevue/button';
 import InputGroup from 'primevue/inputgroup';
 import Chart from 'primevue/chart';
@@ -283,6 +284,25 @@ const setChartOptions = () => {
       }
     }
   };
+}
+
+const pauseAndActiveSimulation = () => {
+  console.log('Pausar/Reanudar Simulacion');
+  // code here
+  let config = {
+  method: 'get',
+  maxBodyLength: Infinity,
+  url: 'http://localhost:3000/pandemia/pause',
+  headers: { }
+};
+
+axios.request(config)
+.then((response) => {
+  console.log(JSON.stringify(response.data));
+})
+.catch((error) => {
+  console.log(error);
+});
 }
 
 </script>

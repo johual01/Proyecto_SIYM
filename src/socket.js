@@ -20,7 +20,7 @@ socket.on("disconnect", () => {
   state.connected = false;
 });
 
-socket.on("newCycle", (result) => {
+socket.on("newCycleFront", (result) => {
   console.log('New cycle!')
   console.log(result)
   state.cycleCounter += 1;

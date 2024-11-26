@@ -648,7 +648,7 @@
                     </div>
                     <div class="pt-6" style="display: flex; justify-content: space-between;">
                         <Button label="Back" severity="secondary" @click="activateCallback('2')" />
-                        <Button severity="success" style="margin-right: 1%;">
+                        <Button severity="success" style="margin-right: 1%;" @click="startSimulation">
                             <router-link to="/Simulacion">Iniciar Simulacion</router-link>
                         </Button>
                     </div>
@@ -665,7 +665,8 @@ export default {
 </script>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, watch } from 'vue';
+import axios from 'axios';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import InputNumber from 'primevue/inputnumber';
@@ -680,14 +681,15 @@ import StepPanel from 'primevue/steppanel';
 import Chart from 'primevue/chart';
 import Checkbox from 'primevue/checkbox';
 import Card from 'primevue/card';
+
 const visible = ref(false);
-/* Datos iniciales*/
+
+/* Datos iniciales */
 const numagentes = ref(0);
 const numinfectados = ref(0);
 
-
-/*distribution*/
-/*poblationalAge*/
+/* distribution */
+/* poblationalAge */
 const d_paneo = ref(0);
 const d_pakid = ref(0);
 const d_payoung = ref(0);
@@ -695,23 +697,23 @@ const d_paadult = ref(0);
 const d_paold = ref(0);
 const d_paoldest = ref(0);
 
-/* healthCondition*/
+/* healthCondition */
 const d_hcathetic = ref(0);
 const d_hchealthy = ref(0);
 const d_hcsedentary = ref(0);
 const d_hccomorbility = ref(0);
 
-/*movility*/
+/* movility */
 const d_mrestricted = ref(0);
 const d_mconstant = ref(0);
 const d_mintermitent = ref(0);
 
-/*atention*/
+/* atention */
 const d_alow = ref(0);
 const d_amedium = ref(0);
 const d_ahigh = ref(0);
 
-/*wealthyDistribution*/
+/* wealthyDistribution */
 const d_wdhalfms = ref(0);
 const d_wdminis = ref(0);
 const d_wdtwoms = ref(0);
@@ -720,7 +722,7 @@ const d_wdfivems = ref(0);
 const d_wdtenms = ref(0);
 const d_wdmorettms = ref(0);
 
-/*profesionalActivity*/
+/* profesionalActivity */
 const d_pacthealthp = ref(0);
 const d_pactessencialp = ref(0);
 const d_pactnormalp = ref(0);
@@ -729,9 +731,8 @@ const d_pactretired = ref(0);
 const d_pactinactive = ref(0);
 const d_pactdomestic = ref(0);
 
-
-/*weight*/
-/*poblationalAge*/
+/* weight */
+/* poblationalAge */
 const w_paneo = ref(0);
 const w_pakid = ref(0);
 const w_payoung = ref(0);
@@ -739,23 +740,23 @@ const w_paadult = ref(0);
 const w_paold = ref(0);
 const w_paoldest = ref(0);
 
-/* healthCondition*/
+/* healthCondition */
 const w_hcathetic = ref(0);
 const w_hchealthy = ref(0);
 const w_hcsedentary = ref(0);
 const w_hccomorbility = ref(0);
 
-/*movility*/
+/* movility */
 const w_mrestricted = ref(0);
 const w_mconstant = ref(0);
 const w_mintermitent = ref(0);
 
-/*atention*/
+/* atention */
 const w_alow = ref(0);
 const w_amedium = ref(0);
 const w_ahigh = ref(0);
 
-/*wealthyDistribution*/
+/* wealthyDistribution */
 const w_wdhalfms = ref(0);
 const w_wdminis = ref(0);
 const w_wdtwoms = ref(0);
@@ -764,7 +765,7 @@ const w_wdfivems = ref(0);
 const w_wdtenms = ref(0);
 const w_wdmorettms = ref(0);
 
-/*profesionalActivity*/
+/* profesionalActivity */
 const w_pacthealthp = ref(0);
 const w_pactessencialp = ref(0);
 const w_pactnormalp = ref(0);
@@ -773,7 +774,7 @@ const w_pactretired = ref(0);
 const w_pactinactive = ref(0);
 const w_pactdomestic = ref(0);
 
-/*Limites*/
+/* Limites */
 const porcen_c_min = ref(0);
 const porcen_c_max = ref(0);
 const tiemp_r_max = ref(0);
@@ -781,121 +782,218 @@ const tiemp_r_min = ref(0);
 const porcen_m_max = ref(0);
 const porcen_m_min = ref(0);
 
-/*ambientalParameters*/
+/* ambientalParameters */
 const apquarentine = ref(false);
 const apmaskUse = ref(false);
 const apsocialDistance = ref(false);
-
-
-const json = {
-    "agents": numagentes,
-    "infected": numinfectados,
-    "distribution": {
-        "poblationalAge": {
-            "neonatal": d_paneo,
-            "kid": d_pakid,
-            "young": d_payoung,
-            "adult": d_paadult,
-            "old": d_paold,
-            "oldest": d_paoldest
+const generateJson = () => {
+    return {
+        "agents": numagentes.value || 1000,
+        "infected": numinfectados.value || 100,
+        "distribution": {
+            "poblationalAge": {
+                "neonatal": d_paneo.value || 0.05,
+                "kid": d_pakid.value || 0.2,
+                "young": d_payoung.value || 0.15,
+                "adult": d_paadult.value || 0.35,
+                "old": d_paold.value || 0.2,
+                "oldest": d_paoldest.value || 0.05
+            },
+            "healthCondition": {
+                "athetic": d_hcathetic.value || 0.2,
+                "healthy": d_hchealthy.value || 0.4,
+                "sedentary": d_hcsedentary.value || 0.3,
+                "comorbility": d_hccomorbility.value || 0.1
+            },
+            "movility": {
+                "restricted": d_mrestricted.value || 0.3,
+                "constant": d_mconstant.value || 0.4,
+                "intermitent": d_mintermitent.value || 0.3
+            },
+            "atention": {
+                "low": d_alow.value || 0.2,
+                "medium": d_amedium.value || 0.5,
+                "high": d_ahigh.value || 0.3
+            },
+            "wealthyDistribution": {
+                "halfMinimumSalary": d_wdhalfms.value || 0.4,
+                "minimumSalary": d_wdminis.value || 0.3,
+                "twoMinimumSalary": d_wdtwoms.value || 0.2,
+                "threeMinimumSalary": d_wdthreems.value || 0.06,
+                "fiveMinimumSalary": d_wdfivems.value || 0.02,
+                "tenMinimumSalary": d_wdtenms.value || 0.015,
+                "moreThanTwelveMinimumSalary": d_wdmorettms.value || 0.005
+            },
+            "profesionalActivity": {
+                "healthProfesional": d_pacthealthp.value || 0.05,
+                "essentialProfesional": d_pactessencialp.value || 0.2,
+                "normalProfesional": d_pactnormalp.value || 0.2,
+                "student": d_pactstudent.value || 0.3,
+                "retired": d_pactretired.value || 0.05,
+                "inactive": d_pactinactive.value || 0.1,
+                "domestic": d_pactdomestic.value || 0.1
+            }
         },
-        "healthCondition": {
-            "athetic": d_hcathetic,
-            "healthy": d_hchealthy,
-            "sedentary": d_hcsedentary,
-            "comorbility": d_hccomorbility
+        "weight": {
+            "poblationalAge": {
+                "neonatal": w_paneo.value || 0.05,
+                "kid": w_pakid.value || 0.2,
+                "young": w_payoung.value || 0.15,
+                "adult": w_paadult.value || 0.35,
+                "old": w_paold.value || 0.2,
+                "oldest": w_paoldest.value || 0.05
+            },
+            "healthCondition": {
+                "athetic": w_hcathetic.value || 0.2,
+                "healthy": w_hchealthy.value || 0.4,
+                "sedentary": w_hcsedentary.value || 0.3,
+                "comorbility": w_hccomorbility.value || 0.1
+            },
+            "movility": {
+                "restricted": w_mrestricted.value || 0.3,
+                "constant": w_mconstant.value || 0.4,
+                "intermitent": w_mintermitent.value || 0.3
+            },
+            "atention": {
+                "low": w_alow.value || 0.2,
+                "medium": w_amedium.value || 0.5,
+                "high": w_ahigh.value || 0.3
+            },
+            "wealthyDistribution": {
+                "halfMinimumSalary": w_wdhalfms.value || 0.4,
+                "minimumSalary": w_wdminis.value || 0.3,
+                "twoMinimumSalary": w_wdtwoms.value || 0.2,
+                "threeMinimumSalary": w_wdthreems.value || 0.06,
+                "fiveMinimumSalary": w_wdfivems.value || 0.02,
+                "tenMinimumSalary": w_wdtenms.value || 0.015,
+                "moreThanTwelveMinimumSalary": w_wdmorettms.value || 0.005
+            },
+            "profesionalActivity": {
+                "healthProfesional": w_pacthealthp.value || 0.05,
+                "essentialProfesional": w_pactessencialp.value || 0.2,
+                "normalProfesional": w_pactnormalp.value || 0.2,
+                "student": w_pactstudent.value || 0.3,
+                "retired": w_pactretired.value || 0.05,
+                "inactive": w_pactinactive.value || 0.1,
+                "domestic": w_pactdomestic.value || 0.1
+            }
         },
-        "movility": {
-            "restricted": d_mrestricted,
-            "constant": d_mconstant,
-            "intermitent": d_mintermitent
+        "ambientalParameters": {
+            "quarentine": apquarentine.value || true,
+            "maskUse": apmaskUse.value || true,
+            "socialDistance": apsocialDistance.value || true
         },
-        "atention": {
-            "low": d_alow,
-            "medium": d_amedium,
-            "high": d_ahigh
+        "contagiousPercentage": {
+            "minimum": porcen_c_min.value || 0.15,
+            "maximum": porcen_c_max.value || 0.45
         },
-        "wealthyDistribution": {
-            "halfMinimumSalary": d_wdhalfms,
-            "minimumSalary": d_wdminis,
-            "twoMinimumSalary": d_wdtwoms,
-            "threeMinimumSalary": d_wdthreems,
-            "fiveMinimumSalary": d_wdfivems,
-            "tenMinimumSalary": d_wdtenms,
-            "moreThanTwelveMinimumSalary": d_wdmorettms
+        "recoveryTime": {
+            "minimum": tiemp_r_min.value || 15,
+            "maximum": tiemp_r_max.value || 21
         },
-        "profesionalActivity": {
-            "healthProfesional": d_pacthealthp,
-            "essentialProfesional": d_pactessencialp,
-            "normalProfesional": d_pactnormalp,
-            "student": d_pactstudent,
-            "retired": d_pactretired,
-            "inactive": d_pactinactive,
-            "domestic": d_pactdomestic
-        }
-    },
-    "weight": {
-        "poblationalAge": {
-            "neonatal": w_paneo,
-            "kid": w_pakid,
-            "young": w_payoung,
-            "adult": w_paadult,
-            "old": w_paold,
-            "oldest": w_paoldest
+        "inmunityTime": {
+            "minimum": 30,
+            "maximum":  60
         },
-        "healthCondition": {
-            "athetic": w_hcathetic,
-            "healthy": w_hchealthy,
-            "sedentary": w_hcsedentary,
-            "comorbility": w_hccomorbility
+        "deathPercentage": {
+            "minimum": porcen_m_min.value || 0.35,
+            "maximum": porcen_m_max.value || 0.6
         },
-        "movility": {
-            "restricted": w_mrestricted,
-            "constant": w_mconstant,
-            "intermitent": w_mintermitent
-        },
-        "atention": {
-            "low": w_alow,
-            "medium": w_amedium,
-            "high": w_ahigh
-        },
-        "wealthyDistribution": {
-            "halfMinimumSalary": w_wdhalfms,
-            "minimumSalary": w_wdminis,
-            "twoMinimumSalary": w_wdtwoms,
-            "threeMinimumSalary": w_wdthreems,
-            "fiveMinimumSalary": w_wdfivems,
-            "tenMinimumSalary": w_wdtenms,
-            "moreThanTwelveMinimumSalary": w_wdmorettms
-        },
-        "profesionalActivity": {
-            "healthProfesional": w_pacthealthp,
-            "essentialProfesional": w_pactessencialp,
-            "normalProfesional": w_pactnormalp,
-            "student": w_pactstudent,
-            "retired": w_pactretired,
-            "inactive": w_pactinactive,
-            "domestic": w_pactdomestic
-        }
-    },
-    "ambientalParameters": {
-        "quarentine": apquarentine,
-        "maskUse": apmaskUse,
-        "socialDistance": apsocialDistance
-    },
-    "contagiousPercentage": {
-        "minimum": porcen_c_min,
-        "maximum": porcen_c_max
-    },
-    "recoveryTime": {
-        "minimum": tiemp_r_min,
-        "maximum": tiemp_r_max
-    },
-    "deathPercentage": {
-        "minimum": porcen_m_min,
-        "maximum": porcen_m_max
-    }
+        "simulation_time": 300
+    };
 }
+
+const startSimulation = () => {
+    const json = generateJson();
+    console.log(json);
+    let config = {
+        method: 'post',
+        maxBodyLength: Infinity,
+        url: 'http://localhost:3000/pandemia/start',
+        headers: { },
+        data: json
+    };
+
+    axios.request(config)
+    .then((response) => {
+        console.log(JSON.stringify(response.data));
+    })
+    .catch((error) => {
+        console.log(error);
+    });
+}
+// Watchers to log changes
+watch(numagentes, (newValue) => console.log('numagentes:', newValue));
+watch(numinfectados, (newValue) => console.log('numinfectados:', newValue));
+watch(d_paneo, (newValue) => console.log('d_paneo:', newValue));
+watch(d_pakid, (newValue) => console.log('d_pakid:', newValue));
+watch(d_payoung, (newValue) => console.log('d_payoung:', newValue));
+watch(d_paadult, (newValue) => console.log('d_paadult:', newValue));
+watch(d_paold, (newValue) => console.log('d_paold:', newValue));
+watch(d_paoldest, (newValue) => console.log('d_paoldest:', newValue));
+watch(d_hcathetic, (newValue) => console.log('d_hcathetic:', newValue));
+watch(d_hchealthy, (newValue) => console.log('d_hchealthy:', newValue));
+watch(d_hcsedentary, (newValue) => console.log('d_hcsedentary:', newValue));
+watch(d_hccomorbility, (newValue) => console.log('d_hccomorbility:', newValue));
+watch(d_mrestricted, (newValue) => console.log('d_mrestricted:', newValue));
+watch(d_mconstant, (newValue) => console.log('d_mconstant:', newValue));
+watch(d_mintermitent, (newValue) => console.log('d_mintermitent:', newValue));
+watch(d_alow, (newValue) => console.log('d_alow:', newValue));
+watch(d_amedium, (newValue) => console.log('d_amedium:', newValue));
+watch(d_ahigh, (newValue) => console.log('d_ahigh:', newValue));
+watch(d_wdhalfms, (newValue) => console.log('d_wdhalfms:', newValue));
+watch(d_wdminis, (newValue) => console.log('d_wdminis:', newValue));
+watch(d_wdtwoms, (newValue) => console.log('d_wdtwoms:', newValue));
+watch(d_wdthreems, (newValue) => console.log('d_wdthreems:', newValue));
+watch(d_wdfivems, (newValue) => console.log('d_wdfivems:', newValue));
+watch(d_wdtenms, (newValue) => console.log('d_wdtenms:', newValue));
+watch(d_wdmorettms, (newValue) => console.log('d_wdmorettms:', newValue));
+watch(d_pacthealthp, (newValue) => console.log('d_pacthealthp:', newValue));
+watch(d_pactessencialp, (newValue) => console.log('d_pactessencialp:', newValue));
+watch(d_pactnormalp, (newValue) => console.log('d_pactnormalp:', newValue));
+watch(d_pactstudent, (newValue) => console.log('d_pactstudent:', newValue));
+watch(d_pactretired, (newValue) => console.log('d_pactretired:', newValue));
+watch(d_pactinactive, (newValue) => console.log('d_pactinactive:', newValue));
+watch(d_pactdomestic, (newValue) => console.log('d_pactdomestic:', newValue));
+watch(w_paneo, (newValue) => console.log('w_paneo:', newValue));
+watch(w_pakid, (newValue) => console.log('w_pakid:', newValue));
+watch(w_payoung, (newValue) => console.log('w_payoung:', newValue));
+watch(w_paadult, (newValue) => console.log('w_paadult:', newValue));
+watch(w_paold, (newValue) => console.log('w_paold:', newValue));
+watch(w_paoldest, (newValue) => console.log('w_paoldest:', newValue));
+watch(w_hcathetic, (newValue) => console.log('w_hcathetic:', newValue));
+watch(w_hchealthy, (newValue) => console.log('w_hchealthy:', newValue));
+watch(w_hcsedentary, (newValue) => console.log('w_hcsedentary:', newValue));
+watch(w_hccomorbility, (newValue) => console.log('w_hccomorbility:', newValue));
+watch(w_mrestricted, (newValue) => console.log('w_mrestricted:', newValue));
+watch(w_mconstant, (newValue) => console.log('w_mconstant:', newValue));
+watch(w_mintermitent, (newValue) => console.log('w_mintermitent:', newValue));
+watch(w_alow, (newValue) => console.log('w_alow:', newValue));
+watch(w_amedium, (newValue) => console.log('w_amedium:', newValue));
+watch(w_ahigh, (newValue) => console.log('w_ahigh:', newValue));
+watch(w_wdhalfms, (newValue) => console.log('w_wdhalfms:', newValue));
+watch(w_wdminis, (newValue) => console.log('w_wdminis:', newValue));
+watch(w_wdtwoms, (newValue) => console.log('w_wdtwoms:', newValue));
+watch(w_wdthreems, (newValue) => console.log('w_wdthreems:', newValue));
+watch(w_wdfivems, (newValue) => console.log('w_wdfivems:', newValue));
+watch(w_wdtenms, (newValue) => console.log('w_wdtenms:', newValue));
+watch(w_wdmorettms, (newValue) => console.log('w_wdmorettms:', newValue));
+watch(w_pacthealthp, (newValue) => console.log('w_pacthealthp:', newValue));
+watch(w_pactessencialp, (newValue) => console.log('w_pactessencialp:', newValue));
+watch(w_pactnormalp, (newValue) => console.log('w_pactnormalp:', newValue));
+watch(w_pactstudent, (newValue) => console.log('w_pactstudent:', newValue));
+watch(w_pactretired, (newValue) => console.log('w_pactretired:', newValue));
+watch(w_pactinactive, (newValue) => console.log('w_pactinactive:', newValue));
+watch(w_pactdomestic, (newValue) => console.log('w_pactdomestic:', newValue));
+watch(porcen_c_min, (newValue) => console.log('porcen_c_min:', newValue));
+watch(porcen_c_max, (newValue) => console.log('porcen_c_max:', newValue));
+watch(tiemp_r_max, (newValue) => console.log('tiemp_r_max:', newValue));
+watch(tiemp_r_min, (newValue) => console.log('tiemp_r_min:', newValue));
+watch(porcen_m_max, (newValue) => console.log('porcen_m_max:', newValue));
+watch(porcen_m_min, (newValue) => console.log('porcen_m_min:', newValue));
+watch(apquarentine, (newValue) => console.log('apquarentine:', newValue));
+watch(apmaskUse, (newValue) => console.log('apmaskUse:', newValue));
+watch(apsocialDistance, (newValue) => console.log('apsocialDistance:', newValue));
 </script>
 
 <style scoped>
