@@ -10,7 +10,7 @@
         <Popover ref="op">
           <div>
             <div class="Card_content">
-              <h2>Ambiental Parameters</h2>
+              <h2>Parametros Ambientales</h2>
               <div style="display: flex; align-items: center;">
                 <div>
                   <div>
@@ -70,7 +70,7 @@
       </div>
       <div>
         <Card>
-          <template #title>25</template>
+          <template #title>{{ istate.cant_sanos }}</template>
           <template #content>
             <p class="m-0">
               Cantidad de Sanos
@@ -78,7 +78,7 @@
           </template>
         </Card>
         <Card>
-          <template #title>14</template>
+          <template #title>{{ istate.cant_infectados }}</template>
           <template #content>
             <p class="m-0">
               Cantidad de Infectados
@@ -87,7 +87,7 @@
         </Card>
 
         <Card>
-          <template #title>10</template>
+          <template #title>{{ istate.cant_recuperados }}</template>
           <template #content>
             <p class="m-0">
               Cantidad de Recuperados
@@ -95,7 +95,7 @@
           </template>
         </Card>
         <Card>
-          <template #title>20</template>
+          <template #title>{{ istate.cant_muertos }}</template>
           <template #content>
             <p class="m-0">
               Cantidad de Muertos
@@ -109,7 +109,7 @@
     :style="{ width: '75rem', height: '46rem' }">
     <div>
       <Card>
-        <template #title>25</template>
+        <template #title>{{ istate.cant_sanos }}</template>
         <template #content>
           <p class="m-0">
             Cantidad de Sanos
@@ -117,7 +117,7 @@
         </template>
       </Card>
       <Card>
-        <template #title>14</template>
+        <template #title>{{ istate.cant_infectados }}</template>
         <template #content>
           <p class="m-0">
             Cantidad de Infectados
@@ -126,7 +126,7 @@
       </Card>
 
       <Card>
-        <template #title>10</template>
+        <template #title>{{ istate.cant_recuperados }}</template>
         <template #content>
           <p class="m-0">
             Cantidad de Recuperados
@@ -134,7 +134,7 @@
         </template>
       </Card>
       <Card>
-        <template #title>20</template>
+        <template #title>{{ istate.cant_muertos }}</template>
         <template #content>
           <p class="m-0">
             Cantidad de Muertos
@@ -143,7 +143,7 @@
       </Card>
     </div>
     <div style="display: flex; justify-content: flex-end;">
-      <Button type="button" label="Descargar Excel" severity="secondary"></Button>
+      <Button type="button" label="Descargar Excel" severity="secondary" :onclick="printExcel"></Button>
       <Button type="button" label="Save"><router-link to="/">Finalizar</router-link></Button>
     </div>
   </Dialog>
@@ -168,8 +168,11 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import SelectButton from 'primevue/selectbutton';
 import Dialog from 'primevue/dialog';
 import { useConfirm } from "primevue/useconfirm";
+import { state } from "@/socket";
+import * as XLSX from 'xlsx';
 
 const confirm = useConfirm();
+const istate = ref(state);
 
 onMounted(() => {
   chartData.value = setChartData();
@@ -216,38 +219,69 @@ const setChartData = () => {
   const documentStyle = getComputedStyle(document.documentElement);
 
   return {
-    labels: ['1', '2', '3', '4', '5', '6', '7'],
+    labels: state.labels,
     datasets: [
       {
         label: 'Cantidad de sanos',
-        data: [65, 59, 80, 81, 56, 55, 40],
+        data: state.array_sanos,
         fill: false,
         borderColor: documentStyle.getPropertyValue('--p-cyan-500'),
         tension: 0.4
       },
       {
         label: 'Cantidad de infectados',
-        data: [2, 18, 20, 9, 46, 77, 10],
+        data: state.array_infectados,
         fill: false,
         borderColor: documentStyle.getPropertyValue('--p-gray-500'),
         tension: 0.4
       },
       {
         label: 'Cantidad de recuperados',
-        data: [8, 4, 4, 1, 6, 7, 0],
+        data: state.array_recuperados,
         fill: false,
         borderColor: documentStyle.getPropertyValue('--p-gray-500'),
         tension: 0.4
       },
       {
         label: 'Cantidad de muertos',
-        data: [11, 28, 40, 19, 15, 11, 2],
+        data: state.array_muertos,
         fill: false,
         borderColor: documentStyle.getPropertyValue('--p-gray-500'),
         tension: 0.4
       }
     ]
   };
+};
+const printExcel = () => {
+  const wb = XLSX.utils.book_new();
+  const wsData = [
+    ['Día', 'Cantidad de Sanos', 'Cantidad de Infectados', 'Cantidad de Recuperados', 'Cantidad de Muertos'],
+    ...state.labels.map((label, index) => [
+      label,
+      state.array_sanos[index],
+      state.array_infectados[index],
+      state.array_recuperados[index],
+      state.array_muertos[index]
+    ])
+  ];
+
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  XLSX.utils.book_append_sheet(wb, ws, 'Simulación');
+
+  const wsSummaryData = [
+    ['Total Sanos', 'Total Infectados', 'Total Recuperados', 'Total Muertos'],
+    [
+      state.array_sanos.reduce((a, b) => a + b, 0),
+      state.array_infectados.reduce((a, b) => a + b, 0),
+      state.array_recuperados.reduce((a, b) => a + b, 0),
+      state.array_muertos.reduce((a, b) => a + b, 0)
+    ]
+  ];
+
+  const wsSummary = XLSX.utils.aoa_to_sheet(wsSummaryData);
+  XLSX.utils.book_append_sheet(wb, wsSummary, 'Resumen');
+
+  XLSX.writeFile(wb, 'Simulacion.xlsx');
 };
 const setChartOptions = () => {
   const documentStyle = getComputedStyle(document.documentElement);
