@@ -2,9 +2,9 @@
     <div style="display: flex;">
         <h1>Parametros Iniciales</h1>
         <div style="display: flex; margin-left: 5%; width: 20%;">
-            <Button label="Cargar por json" severity="success" @click="visible = true"
-                style="margin-right: 1%; width: 100%;" />
-            <Button label="Cargar por defecto" severity="help" @click="visible = true" class="comple_screen" />
+            <input type="file" accept=".json" @change="chargeFromFile" style="display: none;" ref="fileInput">
+            <Button label="Cargar por JSON" severity="success" @click="$refs.fileInput.click()" style="margin-right: 1%; width: 100%;" />
+            <Button label="Cargar por defecto" severity="help" @click="chargeDefault" class="comple_screen" />
         </div>
     </div>
     <div class="card flex justify-center" style="margin-top: 1%;">
@@ -97,15 +97,35 @@
                                                 Maximo
                                             </div>
                                             <InputNumber v-model="tiemp_r_max" inputId="minmax-buttons"
-                                                :minFractionDigits="2" mode="decimal" showButtons step="0.01"
+                                                :minFractionDigits="0" mode="decimal" showButtons step="0.01"
                                                 :min="tiemp_r_min" fluid
                                                 style="width: 8rem; margin-bottom: 5%; margin-right: 5%; " />
                                             <div class="space_right">
                                                 Minimo
                                             </div>
                                             <InputNumber v-model="tiemp_r_min" inputId="minmax-buttons"
-                                                :minFractionDigits="2" mode="decimal" showButtons step="0.01" :min="0"
+                                                :minFractionDigits="0" mode="decimal" showButtons step="0.01" :min="0"
                                                 :max="tiemp_r_max" fluid class="space_right width_8" />
+                                        </div>
+                                    </InputGroup>
+                                </div>
+                                <div>
+                                    <h4>Tiempo de inmunidad</h4>
+                                    <InputGroup>
+                                        <div class="flex" style="align-items: center; width: 100%;">
+                                            <div class="space_right">
+                                                Maximo
+                                            </div>
+                                            <InputNumber v-model="tiemp_i_max" inputId="minmax-buttons"
+                                                :minFractionDigits="0" mode="decimal" showButtons step="0.01"
+                                                :min="tiemp_i_min" fluid
+                                                style="width: 8rem; margin-bottom: 5%; margin-right: 5%; " />
+                                            <div class="space_right">
+                                                Minimo
+                                            </div>
+                                            <InputNumber v-model="tiemp_i_min" inputId="minmax-buttons"
+                                                :minFractionDigits="0" mode="decimal" showButtons step="0.01" :min="0"
+                                                :max="tiemp_i_max" fluid class="space_right width_8" />
                                         </div>
                                     </InputGroup>
                                 </div>
@@ -779,6 +799,8 @@ const porcen_c_min = ref(0);
 const porcen_c_max = ref(0);
 const tiemp_r_max = ref(0);
 const tiemp_r_min = ref(0);
+const tiemp_i_max = ref(0);
+const tiemp_i_min = ref(0);
 const porcen_m_max = ref(0);
 const porcen_m_min = ref(0);
 
@@ -786,6 +808,215 @@ const porcen_m_min = ref(0);
 const apquarentine = ref(false);
 const apmaskUse = ref(false);
 const apsocialDistance = ref(false);
+const chargeFromFile = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type === "application/json") {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const json = JSON.parse(e.target.result);
+                chargeFromJson(json);
+            } catch (error) {
+                console.log('Error', error)
+                alert("El json ingresado es invalido");
+            }
+        };
+        reader.readAsText(file);
+    } else {
+        alert("Por favor, ingrese un archivo JSON");
+    }
+};
+const chargeDefault = () => {
+    chargeFromJson({
+        "agents": 1000,
+        "infected": 100,
+        "distribution": {
+            "poblationalAge": {
+                "neonatal": 0.05,
+                "kid": 0.2,
+                "young": 0.15,
+                "adult": 0.35,
+                "old": 0.2,
+                "oldest": 0.05
+            },
+            "healthCondition": {
+                "athetic": 0.2,
+                "healthy": 0.4,
+                "sedentary": 0.3,
+                "comorbility": 0.1
+            },
+            "movility": {
+                "restricted": 0.3,
+                "constant": 0.4,
+                "intermitent": 0.3
+            },
+            "atention": {
+                "low": 0.2,
+                "medium": 0.5,
+                "high": 0.3
+            },
+            "wealthyDistribution": {
+                "halfMinimumSalary": 0.4,
+                "minimumSalary": 0.3,
+                "twoMinimumSalary": 0.2,
+                "threeMinimumSalary": 0.06,
+                "fiveMinimumSalary": 0.02,
+                "tenMinimumSalary": 0.015,
+                "moreThanTwelveMinimumSalary": 0.005
+            },
+            "profesionalActivity": {
+                "healthProfesional": 0.05,
+                "essentialProfesional": 0.2,
+                "normalProfesional": 0.2,
+                "student": 0.3,
+                "retired": 0.05,
+                "inactive": 0.1,
+                "domestic": 0.1
+            }
+        },
+        "weight": {
+            "poblationalAge": {
+                "neonatal":0.05,
+                "kid": 0.2,
+                "young": 0.15,
+                "adult": 0.35,
+                "old": 0.2,
+                "oldest": 0.05
+            },
+            "healthCondition": {
+                "athetic": 0.2,
+                "healthy": 0.4,
+                "sedentary": 0.3,
+                "comorbility": 0.1
+            },
+            "movility": {
+                "restricted": 0.3,
+                "constant": 0.4,
+                "intermitent": 0.3
+            },
+            "atention": {
+                "low": 0.2,
+                "medium": 0.5,
+                "high": 0.3
+            },
+            "wealthyDistribution": {
+                "halfMinimumSalary": 0.4,
+                "minimumSalary": 0.3,
+                "twoMinimumSalary": 0.2,
+                "threeMinimumSalary": 0.06,
+                "fiveMinimumSalary": 0.02,
+                "tenMinimumSalary": 0.015,
+                "moreThanTwelveMinimumSalary": 0.005
+            },
+            "profesionalActivity": {
+                "healthProfesional": 0.05,
+                "essentialProfesional": 0.2,
+                "normalProfesional": 0.2,
+                "student": 0.3,
+                "retired": 0.05,
+                "inactive": 0.1,
+                "domestic": 0.1
+            }
+        },
+        "ambientalParameters": {
+            "quarentine": true,
+            "maskUse": true,
+            "socialDistance": true
+        },
+        "contagiousPercentage": {
+            "minimum": 0.15,
+            "maximum": 0.45
+        },
+        "recoveryTime": {
+            "minimum": 15,
+            "maximum": 21
+        },
+        "inmunityTime": {
+            "minimum": 30,
+            "maximum":  60
+        },
+        "deathPercentage": {
+            "minimum": 0.35,
+            "maximum": 0.6
+        },
+        "simulation_time": 300
+    })
+}
+const chargeFromJson = (data) => {
+    numagentes.value = data?.agents || 1000;
+    numinfectados.value = data?.infected || 100;
+    d_paneo.value = data?.distribution?.poblationalAge?.neonatal || 0.05;
+    d_pakid.value = data?.distribution?.poblationalAge?.kid || 0.2;
+    d_payoung.value = data?.distribution?.poblationalAge?.young || 0.15;
+    d_paadult.value = data?.distribution?.poblationalAge?.adult || 0.35;
+    d_paold.value = data?.distribution?.poblationalAge?.old || 0.2;
+    d_paoldest.value = data?.distribution?.poblationalAge?.oldest || 0.05;
+    d_hcathetic.value = data?.distribution?.healthCondition?.athetic || 0.2;
+    d_hchealthy.value = data?.distribution?.healthCondition?.healthy || 0.4;
+    d_hcsedentary.value = data?.distribution?.healthCondition?.sedentary || 0.3;
+    d_hccomorbility.value = data?.distribution?.healthCondition?.comorbility || 0.1;
+    d_mrestricted.value = data?.distribution?.movility?.restricted || 0.3;
+    d_mconstant.value = data?.distribution?.movility?.constant || 0.4;
+    d_mintermitent.value = data?.distribution?.movility?.intermitent || 0.3;
+    d_alow.value = data?.distribution?.atention?.low || 0.2;
+    d_amedium.value = data?.distribution?.atention?.medium || 0.5;
+    d_ahigh.value = data?.distribution?.atention?.high || 0.3;
+    d_wdhalfms.value = data?.distribution?.wealthyDistribution?.halfMinimumSalary || 0.4;
+    d_wdminis.value = data?.distribution?.wealthyDistribution?.minimumSalary || 0.3;
+    d_wdtwoms.value = data?.distribution?.wealthyDistribution?.twoMinimumSalary || 0.2;
+    d_wdthreems.value = data?.distribution?.wealthyDistribution?.threeMinimumSalary || 0.06;
+    d_wdfivems.value = data?.distribution?.wealthyDistribution?.fiveMinimumSalary || 0.02;
+    d_wdtenms.value = data?.distribution?.wealthyDistribution?.tenMinimumSalary || 0.015;
+    d_wdmorettms.value = data?.distribution?.wealthyDistribution?.moreThanTwelveMinimumSalary || 0.005;
+    d_pacthealthp.value = data?.distribution?.profesionalActivity?.healthProfesional || 0.05;
+    d_pactessencialp.value = data?.distribution?.profesionalActivity?.essentialProfesional || 0.2;
+    d_pactnormalp.value = data?.distribution?.profesionalActivity?.normalProfesional || 0.2;
+    d_pactstudent.value = data?.distribution?.profesionalActivity?.student || 0.3;
+    d_pactretired.value = data?.distribution?.profesionalActivity?.retired || 0.05;
+    d_pactinactive.value = data?.distribution?.profesionalActivity?.inactive || 0.1;
+    d_pactdomestic.value = data?.distribution?.profesionalActivity?.domestic || 0.1;
+    w_paneo.value = data?.weight?.poblationalAge?.neonatal || 0.05;
+    w_pakid.value = data?.weight?.poblationalAge?.kid || 0.2;
+    w_payoung.value = data?.weight?.poblationalAge?.young || 0.15;
+    w_paadult.value = data?.weight?.poblationalAge?.adult || 0.35;
+    w_paold.value = data?.weight?.poblationalAge?.old || 0.2;
+    w_paoldest.value = data?.weight?.poblationalAge?.oldest || 0.05;
+    w_hcathetic.value = data?.weight?.healthCondition?.athetic || 0.2;
+    w_hchealthy.value = data?.weight?.healthCondition?.healthy || 0.4;
+    w_hcsedentary.value = data?.weight?.healthCondition?.sedentary || 0.3;
+    w_hccomorbility.value = data?.weight?.healthCondition?.comorbility || 0.1;
+    w_mrestricted.value = data?.weight?.movility?.restricted || 0.3;
+    w_mconstant.value = data?.weight?.movility?.constant || 0.4;
+    w_mintermitent.value = data?.weight?.movility?.intermitent || 0.3;
+    w_alow.value = data?.weight?.atention?.low || 0.2;
+    w_amedium.value = data?.weight?.atention?.medium || 0.5;
+    w_ahigh.value = data?.weight?.atention?.high || 0.3;
+    w_wdhalfms.value = data?.weight?.wealthyDistribution?.halfMinimumSalary || 0.4;
+    w_wdminis.value = data?.weight?.wealthyDistribution?.minimumSalary || 0.3;
+    w_wdtwoms.value = data?.weight?.wealthyDistribution?.twoMinimumSalary || 0.2;
+    w_wdthreems.value = data?.weight?.wealthyDistribution?.threeMinimumSalary || 0.06;
+    w_wdfivems.value = data?.weight?.wealthyDistribution?.fiveMinimumSalary || 0.02;
+    w_wdtenms.value = data?.weight?.wealthyDistribution?.tenMinimumSalary || 0.015;
+    w_wdmorettms.value = data?.weight?.wealthyDistribution?.moreThanTwelveMinimumSalary || 0.005;
+    w_pacthealthp.value = data?.weight?.profesionalActivity?.healthProfesional || 0.05;
+    w_pactessencialp.value = data?.weight?.profesionalActivity?.essentialProfesional || 0.2;
+    w_pactnormalp.value = data?.weight?.profesionalActivity?.normalProfesional || 0.2;
+    w_pactstudent.value = data?.weight?.profesionalActivity?.student || 0.3;
+    w_pactretired.value = data?.weight?.profesionalActivity?.retired || 0.05;
+    w_pactinactive.value = data?.weight?.profesionalActivity?.inactive || 0.1;
+    w_pactdomestic.value = data?.weight?.profesionalActivity?.domestic || 0.1;
+    porcen_c_min.value = data?.contagiousPercentage?.minimum || 0.15;
+    porcen_c_max.value = data?.contagiousPercentage?.maximum || 0.45;
+    tiemp_r_max.value = data?.recoveryTime?.maximum || 21;
+    tiemp_r_min.value = data?.recoveryTime?.minimum || 15;
+    tiemp_i_max.value = data?.inmunityTime?.maximum || 60;
+    tiemp_i_min.value = data?.inmunityTime?.minimum || 30;
+    porcen_m_max.value = data?.deathPercentage?.maximum || 0.6;
+    porcen_m_min.value = data?.deathPercentage?.minimum || 0.35;
+    apquarentine.value = data?.ambientalParameters?.quarentine || true;
+    apmaskUse.value = data?.ambientalParameters?.maskUse || true;
+    apsocialDistance.value = data?.ambientalParameters?.socialDistance || true;
+}
 const generateJson = () => {
     return {
         "agents": numagentes.value || 1000,
@@ -892,8 +1123,8 @@ const generateJson = () => {
             "maximum": tiemp_r_max.value || 21
         },
         "inmunityTime": {
-            "minimum": 30,
-            "maximum":  60
+            "minimum": tiemp_i_min.value || 30,
+            "maximum": tiemp_i_max.value || 60
         },
         "deathPercentage": {
             "minimum": porcen_m_min.value || 0.35,
@@ -989,6 +1220,8 @@ watch(porcen_c_min, (newValue) => console.log('porcen_c_min:', newValue));
 watch(porcen_c_max, (newValue) => console.log('porcen_c_max:', newValue));
 watch(tiemp_r_max, (newValue) => console.log('tiemp_r_max:', newValue));
 watch(tiemp_r_min, (newValue) => console.log('tiemp_r_min:', newValue));
+watch(tiemp_i_max, (newValue) => console.log('tiemp_i_max:', newValue));
+watch(tiemp_i_min, (newValue) => console.log('tiemp_i_min:', newValue));
 watch(porcen_m_max, (newValue) => console.log('porcen_m_max:', newValue));
 watch(porcen_m_min, (newValue) => console.log('porcen_m_min:', newValue));
 watch(apquarentine, (newValue) => console.log('apquarentine:', newValue));

@@ -1,7 +1,7 @@
 <template>
     <div class="menu">
         <div class="header">
-            LOGO
+            <router-link to="/">S</router-link>
         </div>
         <div class="Menuitems">
             <a v-for="item in menuitems.items" :key="item.label" :href="item.link" class="item" v-tooltip="item.label">
