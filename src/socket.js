@@ -29,16 +29,23 @@ socket.on("disconnect", () => {
 });
 
 socket.on("newCycleFront", (result) => {
-  console.log('New cycle!')
-  console.log(result)
+  console.log('New cycle!');
+  let count = state.count;
+  console.log(result);
+  
   count += 1;
   state.labels.push(count);
-  state.array_infectados.push(result.sick)
-  state.cant_infectados = result.sick
-  state.array_sanos.push(result.healthy)
-  state.cant_sanos = result.healthy
-  state.array_recuperados.push(result.recovered)
-  state.cant_recuperados = result.recovered
-  state.array_muertos.push(result.dead)
-  state.cant_muertos = result.dead
+  
+  // Actualiza los arrays y las cantidades de manera segura
+  state.array_infectados = [result.sick];
+  state.cant_infectados = result.sick;
+  
+  state.array_sanos = [result.healthy];
+  state.cant_sanos = result.healthy;
+  
+  state.array_recuperados = [result.recovered];
+  state.cant_recuperados = result.recovered;
+  
+  state.array_muertos = [result.dead];
+  state.cant_muertos = result.dead;
 });
